@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>CookCook 验收</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#FFF8F0;color:#333;max-width:420px;margin:0 auto;padding:20px}
+h1{text-align:center;font-size:24px;margin:20px 0 8px}
+.sub{text-align:center;color:#999;font-size:14px;margin-bottom:24px}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card h2{font-size:16px;margin-bottom:12px}
+label{display:block;font-size:14px;margin:8px 0 4px;color:#666}
+input,select{width:100%;padding:10px 12px;border:1px solid #eee;border-radius:10px;font-size:15px;margin-bottom:8px;background:#fafafa}
+.step-row{display:flex;gap:8px;align-items:center}
+.step-row span{white-space:nowrap;font-size:14px;color:#666}
+.step-row input{width:50px;text-align:center}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:14px;font-size:17px;font-weight:600;cursor:pointer;margin-top:12px}
+.btn-primary{background:#FF6B6B;color:#fff}
+.btn-primary:disabled{background:#ccc}
+.btn-outline{background:#fff;color:#FF6B6B;border:2px solid #FF6B6B}
+.result{margin-top:12px;font-size:14px}
+.plan-card{background:#FFF8F0;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #ffe0e0}
+.plan-card h3{font-size:16px;color:#FF6B6B;margin-bottom:8px}
+.plan-card .dish{font-size:14px;padding:4px 0}
+.plan-card .meta{font-size:12px;color:#999;margin-top:8px}
+.plan-card .rationale{font-size:12px;color:#888;margin-top:4px;line-height:1.5}
+.error{color:#FF6B6B;font-size:14px;padding:8px;background:#fff0f0;border-radius:8px}
+.loading{text-align:center;padding:20px;color:#999}
+.step-indicator{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+.step-dot{width:12px;height:12px;border-radius:50%;background:#eee}
+.step-dot.active{background:#FF6B6B}
+.step-dot.done{background:#4CAF50}
+</style>
+</head>
+<body>
+<h1>🍳 CookCook</h1>
+<p class="sub">情侣搭饭 · 验收版</p>
+
+<div class="step-indicator">
+  <div class="step-dot active" id="dot1"></div>
+  <div class="step-dot" id="dot2"></div>
+  <div class="step-dot" id="dot3"></div>
+</div>
+
+<!-- Step 1: Scenario & Profile -->
+<div class="card" id="step1">
+  <h2>Step 1: 选场景 & 口味</h2>
+  <label>场景</label>
+  <select id="scenario">
+    <option value="random">🎲 随机搭配一顿饭</option>
+    <option value="fridge">🧊 冰箱食材</option>
+    <option value="leftovers">🍱 剩菜改造</option>
+  </select>
+  <label>饭菜结构</label>
+  <div class="step-row">
+    <span>荤</span><input type="number" id="meat" value="1" min="0" max="5">
+    <span>素</span><input type="number" id="veg" value="1" min="0" max="5">
+    <span>汤</span><input type="number" id="soup" value="1" min="0" max="5">
+  </div>
+  <label>我今天想吃（逗号分隔）</label>
+  <input type="text" id="selfFlavor" value="酸辣,下饭" placeholder="如: 酸辣,下饭">
+  <label>对方想吃</label>
+  <input type="text" id="partnerFlavor" value="清淡,想喝汤" placeholder="如: 清淡,想喝汤">
+  <label>时间限制（分钟，可选）</label>
+  <input type="number" id="timeBudget" value="60" min="10" max="180">
+  <button class="btn btn-primary" onclick="step1Generate()">🍳 生成整餐方案</button>
+  <div id="step1Result" class="result"></div>
+</div>
+
+<!-- Step 2: Meal Plans -->
+<div class="card" id="step2" style="display:none">
+  <h2>Step 2: 选择方案</h2>
+  <div id="plansContainer"></div>
+  <div id="step2Result" class="result"></div>
+</div>
+
+<!-- Step 3: Confirm -->
+<div class="card" id="step3" style="display:none">
+  <h2>Step 3: 确认</h2>
+  <div id="confirmInfo"></div>
+  <button class="btn btn-primary" id="confirmBtn" onclick="step3Confirm()">✅ 就这个方案</button>
+  <div id="step3Result" class="result"></div>
+</div>
+
+<script>
+const API = 'http://localhost:3456/api';
+let profileId = null;
+let currentPlans = [];
+let selectedPlanIdx = 0;
+
+function setStep(n) {
+  ['step1','step2','step3'].forEach((s,i) => {
+    document.getElementById(s).style.display = i+1 === n ? 'block' : 'none';
+  });
+  ['dot1','dot2','dot3'].forEach((d,i) => {
+    const el = document.getElementById(d);
+    el.className = 'step-dot' + (i+1 === n ? ' active' : i+1 < n ? ' done' : '');
+  });
+}
+
+async function step1Generate() {
+  const btn = document.querySelector('#step1 .btn');
+  btn.disabled = true;
+  btn.textContent = '生成中...';
+  const result = document.getElementById('step1Result');
+  result.innerHTML = '<div class="loading">正在调用推荐引擎...</div>';
+
+  try {
+    if (!profileId) {
+      const pr = await fetch(API + '/profiles', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          partnerA:{name:'我',role:'self',likedFlavors:[],dislikedFlavors:[],allergies:[],dietaryRestrictions:[],recentAversions:[],cookingSkill:2,cookingPatience:2,isPrimaryCook:true},
+          partnerB:{name:'对方',role:'partner',likedFlavors:[],dislikedFlavors:[],allergies:[],dietaryRestrictions:[],recentAversions:[],cookingSkill:2,cookingPatience:2,isPrimaryCook:false}
+        })
+      });
+      const pj = await pr.json();
+      if (!pj.success) throw new Error(pj.error||'创建档案失败');
+      profileId = pj.data.id;
+    }
+
+    const selfFlavors = document.getElementById('selfFlavor').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+    const partnerFlavors = document.getElementById('partnerFlavor').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+
+    const gr = await fetch(API + '/meal-plans/generate', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        scenario: document.getElementById('scenario').value,
+        mealStructure:{
+          meat: +document.getElementById('meat').value,
+          veg: +document.getElementById('veg').value,
+          soup: +document.getElementById('soup').value
+        },
+        timeBudgetMinutes: +document.getElementById('timeBudget').value || undefined,
+        todayFlavors:{ self: selfFlavors, partner: partnerFlavors },
+        coupleProfileId: profileId
+      })
+    });
+    const gj = await gr.json();
+    if (!gj.success) throw new Error(gj.error||'生成失败');
+
+    currentPlans = gj.data.plans;
+    if (!currentPlans.length) {
+      result.innerHTML = '<div class="error">没有匹配的方案，试试调整口味或结构</div>';
+    } else {
+      result.innerHTML = '<div style="color:#4CAF50">✅ 生成了 '+currentPlans.length+' 套方案</div>';
+      renderPlans();
+      setStep(2);
+    }
+  } catch(e) {
+    result.innerHTML = '<div class="error">❌ '+e.message+'</div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🍳 生成整餐方案';
+  }
+}
+
+function renderPlans() {
+  const container = document.getElementById('plansContainer');
+  container.innerHTML = currentPlans.map((p,i) => `
+    <div class="plan-card" style="${i===selectedPlanIdx?'border-color:#FF6B6B;border-width:2px':''}" onclick="selectPlan(${i})">
+      <h3>方案 ${'ABC'[i]}</h3>
+      ${p.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}
+      <div class="meta">⏱ 约${p.totalTimeMinutes}分钟 · 难度${'⭐'.repeat(p.difficulty)}</div>
+      <div class="rationale">${p.rationale}</div>
+    </div>
+  `).join('');
+  setStep(2);
+}
+
+function selectPlan(i) {
+  selectedPlanIdx = i;
+  renderPlans();
+}
+
+async function step3Confirm() {
+  const plan = currentPlans[selectedPlanIdx];
+  document.getElementById('confirmInfo').innerHTML = `
+    <div class="plan-card">
+      <h3>确认方案 ${'ABC'[selectedPlanIdx]}</h3>
+      ${plan.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}
+      <div class="meta">⏱ 约${plan.totalTimeMinutes}分钟</div>
+    </div>`;
+  setStep(3);
+}
+
+async function step3Confirm() {
+  const plan = currentPlans[selectedPlanIdx];
+  const result = document.getElementById('step3Result');
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('confirmBtn').textContent = '确认中...';
+
+  try {
+    const cr = await fetch(API + '/meal-plans/' + plan.id + '/confirm', { method:'PATCH' });
+    const cj = await cr.json();
+    if (!cj.success) throw new Error(cj.error||'确认失败');
+    result.innerHTML = '<div style="color:#4CAF50;font-size:18px;text-align:center;padding:20px">🎉 验收通过！<br><small>方案已确认</small></div>';
+  } catch(e) {
+    result.innerHTML = '<div class="error">❌ '+e.message+'</div>';
+  } finally {
+    document.getElementById('confirmBtn').disabled = false;
+    document.getElementById('confirmBtn').textContent = '✅ 就这个方案';
+  }
+}
+</script>
+</body>
+</html>
