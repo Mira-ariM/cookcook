@@ -1,0 +1,11 @@
+{
+  "name": "mealbuddy",
+  "private": true,
+  "workspaces": ["server", "shared"],
+  "scripts": {
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev:weapp",
+    "db:migrate": "cd server && npm run db:migrate",
+    "db:seed": "cd server && npm run db:seed"
+  }
+}
