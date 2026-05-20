@@ -1,0 +1,14 @@
+.home {
+  padding: 40px 24px;
+  &-header { text-align: center; margin-bottom: 40px; }
+  &-title { font-size: 28px; font-weight: 700; display: block; }
+  &-subtitle { font-size: 16px; color: #999; margin-top: 8px; display: block; }
+}
+.scenario-list { display: flex; flex-direction: column; gap: 16px; }
+.scenario-card {
+  background: #fff; border-radius: 16px; padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  &:active { opacity: .7; }
+}
+.scenario-label { font-size: 18px; font-weight: 600; display: block; }
+.scenario-desc { font-size: 14px; color: #999; margin-top: 4px; display: block; }

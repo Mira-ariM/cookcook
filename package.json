@@ -1,7 +1,7 @@
 {
   "name": "mealbuddy",
   "private": true,
-  "workspaces": ["server", "shared"],
+  "workspaces": ["server", "client", "shared"],
   "scripts": {
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev:weapp",

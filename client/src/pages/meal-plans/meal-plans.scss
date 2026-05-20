@@ -1,0 +1,14 @@
+.plan-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.tab { flex: 1; text-align: center; padding: 12px; border-radius: 12px; background: #fff; font-weight: 500; }
+.tab.active { background: #FF6B6B; color: #fff; }
+.plan-content { flex: 1; }
+.plan-rationale { font-size: 14px; color: #666; display: block; margin-bottom: 8px; }
+.plan-meta { font-size: 14px; color: #999; display: block; margin-bottom: 16px; }
+.dish-card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; position: relative; }
+.dish-role { font-size: 12px; color: #FF6B6B; font-weight: 600; }
+.dish-name { font-size: 18px; font-weight: 700; display: block; margin: 4px 0; }
+.dish-reason { font-size: 13px; color: #999; }
+.dish-time { font-size: 12px; color: #aaa; margin-top: 4px; display: block; }
+.replace-btn { position: absolute; right: 16px; bottom: 16px; }
+.bottom-bar { padding: 16px 0; }
+.confirm-btn { background: #FF6B6B; color: #fff; border-radius: 16px; height: 52px; line-height: 52px; font-size: 18px; }
