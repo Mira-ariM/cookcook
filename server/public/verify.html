@@ -185,7 +185,7 @@ function renderPlans() {
       ${p.dishes.map((d,j)=>`<div class="dish-row"><span class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></span><button class="btn-sm" onclick="event.stopPropagation();openReplace(${i},${j})">🔄</button></div>`).join('')}
       <div class="meta">⏱ 约${p.totalTimeMinutes}分钟 · 难度${'⭐'.repeat(p.difficulty)}</div>
       <div class="rationale">${p.rationale}</div>
-      <button class="btn btn-outline" style="margin-top:8px" onclick="event.stopPropagation();openReplace(${i},-1)">👉 选这套，去替换/确认</button>
+      <button class="btn btn-primary" style="margin-top:8px" onclick="event.stopPropagation();goToConfirm(${i})">✅ 确认这套</button>
     </div>
   `).join('');
   setStep(2);
@@ -205,12 +205,22 @@ function openReplace(planIdx, dishIdx) {
 
 async function doReplace(planIdx, dishIdx) {
   const plan = currentPlans[planIdx];
-  const btn = document.querySelectorAll('#replaceInfo .btn-sm')[dishIdx];
+  const dish = plan.dishes[dishIdx];
+  const btns = document.querySelectorAll('#replaceInfo .btn-sm');
+  const btn = btns[dishIdx];
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   try {
+    // Find an alternative recipe of the same type
+    const type = dish.role;
+    const altRes = await fetch(API + '/recipes?type=' + encodeURIComponent(type) + '&limit=10');
+    const altData = await altRes.json();
+    const alts = (altData.data || []).filter((r) => r.id !== dish.recipeId);
+    if (!alts.length) throw new Error('没有同类型替补菜谱');
+    const pick = alts[Math.floor(Math.random() * Math.min(alts.length, 5))];
+
     const res = await fetch(API + '/meal-plans/' + plan.id + '/replace-dish', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ dishIndex: dishIdx, newRecipeId: '' })
+      body: JSON.stringify({ dishIndex: dishIdx, newRecipeId: pick.id })
     });
     const data = await res.json();
     if (data.success) {
