@@ -28,10 +28,20 @@ input,select{width:100%;padding:10px 12px;border:1px solid #eee;border-radius:10
 .plan-card .rationale{font-size:12px;color:#888;margin-top:4px;line-height:1.5}
 .error{color:#FF6B6B;font-size:14px;padding:8px;background:#fff0f0;border-radius:8px}
 .loading{text-align:center;padding:20px;color:#999}
+.dish-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+.btn-sm{background:#fff;border:1px solid #FF6B6B;color:#FF6B6B;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer}
+.btn-sm:active{background:#fff0f0}
 .step-indicator{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
 .step-dot{width:12px;height:12px;border-radius:50%;background:#eee}
 .step-dot.active{background:#FF6B6B}
 .step-dot.done{background:#4CAF50}
+.swap-btn{font-size:12px;padding:2px 8px;border:1px solid #FF6B6B;border-radius:6px;background:#fff;color:#FF6B6B;cursor:pointer;margin-left:8px}
+.swap-btn:hover{background:#FF6B6B;color:#fff}
+.alt-list{max-height:200px;overflow-y:auto;margin-top:8px}
+.alt-item{padding:8px 12px;border-bottom:1px solid #eee;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.alt-item:hover{background:#FFF0F0}
+.alt-item .time{font-size:12px;color:#999}
+.replacing{opacity:0.5;pointer-events:none}
 </style>
 </head>
 <body>
@@ -42,6 +52,7 @@ input,select{width:100%;padding:10px 12px;border:1px solid #eee;border-radius:10
   <div class="step-dot active" id="dot1"></div>
   <div class="step-dot" id="dot2"></div>
   <div class="step-dot" id="dot3"></div>
+  <div class="step-dot" id="dot4"></div>
 </div>
 
 <!-- Step 1: Scenario & Profile -->
@@ -76,25 +87,34 @@ input,select{width:100%;padding:10px 12px;border:1px solid #eee;border-radius:10
   <div id="step2Result" class="result"></div>
 </div>
 
-<!-- Step 3: Confirm -->
+<!-- Step 3: Replace Dish -->
 <div class="card" id="step3" style="display:none">
-  <h2>Step 3: 确认</h2>
-  <div id="confirmInfo"></div>
-  <button class="btn btn-primary" id="confirmBtn" onclick="step3Confirm()">✅ 就这个方案</button>
+  <h2>Step 3: 替换单道菜</h2>
+  <div id="replaceInfo"></div>
+  <div id="altContainer" class="alt-list" style="display:none"></div>
+  <button class="btn btn-outline" onclick="goToConfirm()" style="margin-top:12px">👉 不需要换，直接确认</button>
   <div id="step3Result" class="result"></div>
 </div>
 
+<!-- Step 4: Confirm -->
+<div class="card" id="step4" style="display:none">
+  <h2>Step 4: 确认</h2>
+  <div id="confirmInfo"></div>
+  <button class="btn btn-primary" id="confirmBtn" onclick="step4Confirm()">✅ 就这个方案</button>
+  <div id="step4Result" class="result"></div>
+</div>
+
 <script>
-const API = 'http://localhost:3456/api';
+const API = '/api';
 let profileId = null;
 let currentPlans = [];
 let selectedPlanIdx = 0;
 
 function setStep(n) {
-  ['step1','step2','step3'].forEach((s,i) => {
+  ['step1','step2','step3','step4'].forEach((s,i) => {
     document.getElementById(s).style.display = i+1 === n ? 'block' : 'none';
   });
-  ['dot1','dot2','dot3'].forEach((d,i) => {
+  ['dot1','dot2','dot3','dot4'].forEach((d,i) => {
     const el = document.getElementById(d);
     el.className = 'step-dot' + (i+1 === n ? ' active' : i+1 < n ? ' done' : '');
   });
@@ -160,22 +180,50 @@ async function step1Generate() {
 function renderPlans() {
   const container = document.getElementById('plansContainer');
   container.innerHTML = currentPlans.map((p,i) => `
-    <div class="plan-card" style="${i===selectedPlanIdx?'border-color:#FF6B6B;border-width:2px':''}" onclick="selectPlan(${i})">
+    <div class="plan-card" style="${i===selectedPlanIdx?'border-color:#FF6B6B;border-width:2px':''}">
       <h3>方案 ${'ABC'[i]}</h3>
-      ${p.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}
+      ${p.dishes.map((d,j)=>`<div class="dish-row"><span class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></span><button class="btn-sm" onclick="event.stopPropagation();openReplace(${i},${j})">🔄</button></div>`).join('')}
       <div class="meta">⏱ 约${p.totalTimeMinutes}分钟 · 难度${'⭐'.repeat(p.difficulty)}</div>
       <div class="rationale">${p.rationale}</div>
+      <button class="btn btn-outline" style="margin-top:8px" onclick="event.stopPropagation();openReplace(${i},-1)">👉 选这套，去替换/确认</button>
     </div>
   `).join('');
   setStep(2);
 }
 
-function selectPlan(i) {
-  selectedPlanIdx = i;
-  renderPlans();
+function openReplace(planIdx, dishIdx) {
+  selectedPlanIdx = planIdx;
+  const plan = currentPlans[planIdx];
+  let html = '<h3>方案 ' + 'ABC'[planIdx] + ' — 替换单道菜</h3>';
+  plan.dishes.forEach((d,j) => {
+    html += '<div class="dish-row" style="margin:8px 0"><span class="dish">'+d.role+'：<strong>'+d.recipeSnapshot.name+'</strong></span><button class="btn-sm" onclick="doReplace('+planIdx+','+j+')">🔄 换一道</button></div>';
+  });
+  document.getElementById('replaceInfo').innerHTML = html;
+  if (dishIdx >= 0) doReplace(planIdx, dishIdx);
+  setStep(3);
 }
 
-async function step3Confirm() {
+async function doReplace(planIdx, dishIdx) {
+  const plan = currentPlans[planIdx];
+  const btn = document.querySelectorAll('#replaceInfo .btn-sm')[dishIdx];
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    const res = await fetch(API + '/meal-plans/' + plan.id + '/replace-dish', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ dishIndex: dishIdx, newRecipeId: '' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentPlans[planIdx] = data.data;
+      openReplace(planIdx, -1);
+    } else {
+      alert('替换失败: ' + (data.error||'unknown'));
+    }
+  } catch(e) { alert('替换失败: ' + e.message); }
+  if (btn) { btn.disabled = false; btn.textContent = '🔄 换一道'; }
+}
+
+function goToConfirm() {
   const plan = currentPlans[selectedPlanIdx];
   document.getElementById('confirmInfo').innerHTML = `
     <div class="plan-card">
@@ -183,12 +231,12 @@ async function step3Confirm() {
       ${plan.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}
       <div class="meta">⏱ 约${plan.totalTimeMinutes}分钟</div>
     </div>`;
-  setStep(3);
+  setStep(4);
 }
 
-async function step3Confirm() {
+async function step4Confirm() {
   const plan = currentPlans[selectedPlanIdx];
-  const result = document.getElementById('step3Result');
+  const result = document.getElementById('step4Result');
   document.getElementById('confirmBtn').disabled = true;
   document.getElementById('confirmBtn').textContent = '确认中...';
 
