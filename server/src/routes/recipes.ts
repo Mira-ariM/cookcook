@@ -29,7 +29,8 @@ recipeRoutes.get('/', async (req: Request, res: Response) => {
     const { rows } = await pool.query(query, params);
     res.json({ success: true, data: rows });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('recipes error:', err);
+    res.status(500).json({ success: false, error: err.message || String(err) });
   }
 });
 
@@ -62,6 +63,7 @@ recipeRoutes.get('/:id', async (req: Request, res: Response) => {
       },
     });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('recipes error:', err);
+    res.status(500).json({ success: false, error: err.message || String(err) });
   }
 });

@@ -35,7 +35,8 @@ profileRoutes.post('/', async (req: Request, res: Response) => {
     );
     res.json({ success: true, data: { id: rows[0].id } });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('profiles error:', err);
+    res.status(500).json({ success: false, error: err.message || String(err) });
   }
 });
 
@@ -49,6 +50,7 @@ profileRoutes.get('/:id', async (req: Request, res: Response) => {
     }
     res.json({ success: true, data: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('profiles error:', err);
+    res.status(500).json({ success: false, error: err.message || String(err) });
   }
 });
