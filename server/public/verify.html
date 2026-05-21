@@ -116,7 +116,7 @@ textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #eee;font-s
 <div class="card" id="step5" style="display:none">
   <h2>🍳 Step 5: 做饭模式</h2>
   <div id="cookingContainer"></div>
-  <button class="btn btn-primary" style="background:#4CAF50;display:none" id="finishCookBtn" onclick="goFeedback()">🎉 全部完成，去评价</button>
+  <button class="btn btn-primary" style="background:#4CAF50;display:none;position:sticky;bottom:0" id="finishCookBtn" onclick="goFeedback()">🎉 全部完成，去评价</button>
 </div>
 
 <!-- Step 6: Feedback -->
@@ -236,7 +236,7 @@ function renderCooking(){
     html+=`<div class="cooking-dish"><h3>${d.role}：${d.recipeSnapshot.name}</h3>`;
     d.recipeSnapshot.steps.forEach(s=>{
       const done=cookState.completed.includes(stepIdx);
-      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${(s.step_order||s.order||'')}. ${s.description}<div class="step-meta">${s.durationMinutes?'⏱'+s.durationMinutes+'分钟 ':''}${s.fireHint?'🔥'+s.fireHint+' ':''}${s.warning?'⚠️'+s.warning:''}</div></div></div>`;
+      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${(s.step_order||s.order||(idx+1))}. ${s.description}<div class="step-meta">${s.durationMinutes?'⏱'+s.durationMinutes+'分钟 ':''}${s.fireHint?'🔥'+s.fireHint+' ':''}${s.warning?'⚠️'+s.warning:''}</div></div></div>`;
       stepIdx++;
     });
     html+='</div>';
