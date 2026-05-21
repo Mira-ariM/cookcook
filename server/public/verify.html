@@ -286,7 +286,7 @@ async function submitFeedback(){
     const cr=await fetch(API+'/meal-plans/'+selectedPlan.id+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       feedbackA:{overall:fs.a.overall,tags:fs.a.tags,wouldRepeat:fs.a.tags.includes('下次还想吃')},
       feedbackB:{overall:fs.b.overall,tags:fs.b.tags,wouldRepeat:fs.b.tags.includes('下次还想吃')},
-      dishFeedbacks:selectedPlan.dishes.map(d=>({recipeId:d.recipeId,overall:fs.a.overall,tags:fs.a.tags,wouldRepeat:fs.a.tags.includes('下次还想吃')})),
+      dishFeedbacks:selectedPlan.dishes.map(d=>({recipeId:d.recipe_id||d.recipeId,overall:fs.a.overall,tags:fs.a.tags,wouldRepeat:fs.a.tags.includes('下次还想吃')})),
       note:document.getElementById('feedbackNote').value,photoUrl:undefined
     })});
     const j=await cr.json();if(!j.success)throw new Error(j.error||'提交失败');
