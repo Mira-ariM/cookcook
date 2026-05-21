@@ -265,10 +265,10 @@ function goFeedback(){
     h+='</div>';
     return h;
   };
+  window.feedbackState={a:{overall:'delicious',tags:[]},b:{overall:'delicious',tags:[]}};
   document.getElementById('feedbackContainerA').innerHTML=makePerson('a','我的评价');
   document.getElementById('feedbackContainerB').innerHTML=makePerson('b','对方的评价');
   setRating('a','delicious');setRating('b','delicious');
-  window.feedbackState={a:{overall:'delicious',tags:[]},b:{overall:'delicious',tags:[]}};
 }
 function setRating(who,val){
   ['delicious','okay','never_again'].forEach(k=>document.getElementById(who+'-rate-'+k).className='rating-btn'+(k===val?' active':''));
