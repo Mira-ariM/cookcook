@@ -236,7 +236,7 @@ function renderCooking(){
     html+=`<div class="cooking-dish"><h3>${d.role}：${d.recipeSnapshot.name}</h3>`;
     d.recipeSnapshot.steps.forEach(s=>{
       const done=cookState.completed.includes(stepIdx);
-      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${s.order}. ${s.description}<div class="step-meta">${s.durationMinutes?'⏱'+s.durationMinutes+'分钟 ':''}${s.fireHint?'🔥'+s.fireHint+' ':''}${s.warning?'⚠️'+s.warning:''}</div></div></div>`;
+      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${(s.step_order||s.order||'')}. ${s.description}<div class="step-meta">${s.durationMinutes?'⏱'+s.durationMinutes+'分钟 ':''}${s.fireHint?'🔥'+s.fireHint+' ':''}${s.warning?'⚠️'+s.warning:''}</div></div></div>`;
       stepIdx++;
     });
     html+='</div>';
