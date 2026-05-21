@@ -318,8 +318,12 @@ function pickDish(
 
   // Pick with variant offset for diversity
   const candidates = [...diff, ...same];
+  if (candidates.length === 0) {
+    // Fallback: any unused recipe in this category
+    return group.find(s => !usedIds.has(s.recipe.id));
+  }
   const index = Math.min(variant, candidates.length - 1);
-  return candidates[index] || group.find(s => !usedIds.has(s.recipe.id));
+  return candidates[index];
 }
 
 function toMealDish(

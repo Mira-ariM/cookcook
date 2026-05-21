@@ -170,7 +170,7 @@ async function confirmPlan(pi){
   try{
     const cr=await fetch(API+'/meal-plans/'+selectedPlan.id+'/confirm',{method:'PATCH'});
     const cj=await cr.json();if(!cj.success)throw new Error(cj.error||'确认失败');
-    r.innerHTML='<div style="color:#4CAF50;font-size:16px;text-align:center;padding:10px">✅ 方案已确认！<br><button class="btn btn-primary" style="margin-top:12px" onclick="setStep(4);goShopping()">👉 下一步：购物清单</button></div>';
+    r.innerHTML='<div style="color:#4CAF50;font-size:16px;text-align:center;padding:10px">✅ 方案已确认！</div>';setTimeout(()=>{setStep(4);goShopping();},500);
   }catch(e){r.innerHTML='<div class="error">'+e.message+'</div>';}
 }
 
