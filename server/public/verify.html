@@ -209,7 +209,24 @@ async function checkItem(section,idx,checked){
 
 // ═══ Step 5: Cooking ═══
 let cookState={completed:[],current:0};
-function goCooking(){setStep(5);renderCooking();}
+async function goCooking(){
+  setStep(5);
+  const c=document.getElementById('cookingContainer');c.innerHTML='<div class="loading">加载菜谱步骤...</div>';
+  try{
+    // Reload plan with full recipe data (DB returns flat rows, need to enrich)
+    const pr=await fetch(API+'/meal-plans/'+selectedPlan.id);const pj=await pr.json();
+    if(!pj.success)throw new Error(pj.error);
+    // Load full recipe data for each dish (steps, ingredients, etc.)
+    const enriched={...pj.data,dishes:[]};
+    for(const d of pj.data.dishes||[]){
+      const rr=await fetch(API+'/recipes/'+d.recipe_id);
+      const rj=await rr.json();
+      enriched.dishes.push({...d,recipeSnapshot:rj.data||{}});
+    }
+    selectedPlan=enriched;
+    renderCooking();
+  }catch(e){c.innerHTML='<div class="error">'+e.message+'</div>';}
+}
 function renderCooking(){
   const allSteps=[];selectedPlan.dishes.forEach(d=>{d.recipeSnapshot.steps.forEach(s=>allSteps.push({...s,dishName:d.recipeSnapshot.name,role:d.role}));});
   // Group by dish
