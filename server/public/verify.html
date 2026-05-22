@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>CookCook 验收</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif;background:#FFF8F0;color:#333;max-width:420px;margin:0 auto;padding:20px}
 h1{text-align:center;font-size:24px;margin:20px 0 8px}
 .sub{text-align:center;color:#999;font-size:14px;margin-bottom:24px}
@@ -62,7 +62,7 @@ textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #eee;font-s
 </style>
 </head>
 <body>
-<h1>🍳 CookCook</h1>
+<h1>CookCook</h1>
 <p class="sub">情侣搭饭 · 验收版</p>
 
 <div class="step-indicator">
@@ -75,7 +75,7 @@ textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #eee;font-s
 <div class="card" id="step1">
   <h2>Step 1: 选场景 & 口味</h2>
   <label>场景</label>
-  <select id="scenario"><option value="random">🎲 随机搭配一顿饭</option><option value="fridge">🧊 冰箱食材</option><option value="leftovers">🍱 剩菜改造</option></select>
+  <select id="scenario"><option value="random">随机搭配一顿饭</option><option value="fridge">冰箱食材</option><option value="leftovers">剩菜改造</option></select>
   <label>饭菜结构</label>
   <div class="step-row"><span>荤</span><input type="number" id="meat" value="1" min="0" max="5"><span>素</span><input type="number" id="veg" value="1" min="0" max="5"><span>汤</span><input type="number" id="soup" value="1" min="0" max="5"></div>
   <label>我今天想吃（逗号分隔）</label>
@@ -84,7 +84,7 @@ textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #eee;font-s
   <input type="text" id="partnerFlavor" value="清淡,想喝汤" placeholder="如: 清淡,想喝汤">
   <label>时间限制（分钟，可选）</label>
   <input type="number" id="timeBudget" value="60" min="10" max="180">
-  <button class="btn btn-primary" onclick="step1Generate()">🍳 生成整餐方案</button>
+  <button class="btn btn-primary" onclick="step1Generate()">生成整餐方案</button>
   <div id="step1Result" class="result"></div>
 </div>
 
@@ -100,31 +100,31 @@ textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #eee;font-s
   <h2>Step 3: 确认</h2>
   <div id="confirmInfo"></div>
   <div id="step3Result" class="result"></div>
-  <p class="back-link"><a href="javascript:setStep(2)">🔙 返回方案列表</a></p>
+  <p class="back-link"><a href="javascript:setStep(2)">返回方案列表</a></p>
 </div>
 
 <!-- Step 4: Shopping List -->
 <div class="card" id="step4" style="display:none">
-  <h2>🛒 Step 4: 购物清单</h2>
+  <h2>Step 4: 购物清单</h2>
   <div id="shoppingContainer"></div>
   <button class="btn btn-primary" onclick="goShopping()">加载购物清单</button>
-  <button class="btn btn-primary" style="background:#4CAF50;display:none" id="goCookBtn" onclick="goCooking()">🔪 买好了，开始做饭</button>
+  <button class="btn btn-primary" style="background:#4CAF50;display:none" id="goCookBtn" onclick="goCooking()">买好了，开始做饭</button>
 </div>
 
 <!-- Step 5: Cooking -->
 <div class="card" id="step5" style="display:none">
-  <h2>🍳 Step 5: 做饭模式</h2>
+  <h2>Step 5: 做饭模式</h2>
   <div id="cookingContainer"></div>
-  <button class="btn btn-primary" style="background:#4CAF50;display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:380px;z-index:100;box-shadow:0 -4px 12px rgba(0,0,0,.1)" id="finishCookBtn" onclick="goFeedback()">🎉 全部完成，去评价</button>
+  <button class="btn btn-primary" style="background:#4CAF50;display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:380px;z-index:100;box-shadow:0 -4px 12px rgba(0,0,0,.1)" id="finishCookBtn" onclick="goFeedback()">全部完成，去评价</button>
 </div>
 
 <!-- Step 6: Feedback -->
 <div class="card" id="step6" style="display:none">
-  <h2>💬 Step 6: 饭后反馈</h2>
+  <h2>Step 6: 饭后反馈</h2>
   <div id="feedbackContainerA"></div>
   <div id="feedbackContainerB"></div>
   <textarea id="feedbackNote" placeholder="一句话备注（可选）..." rows="2"></textarea>
-  <button class="btn btn-primary" onclick="submitFeedback()">💾 提交反馈</button>
+  <button class="btn btn-primary" onclick="submitFeedback()">提交反馈</button>
   <div id="step6Result" class="result"></div>
 </div>
 
@@ -149,27 +149,27 @@ async function step1Generate(){
     const gr=await fetch(API+'/meal-plans/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scenario:document.getElementById('scenario').value,mealStructure:{meat:+document.getElementById('meat').value,veg:+document.getElementById('veg').value,soup:+document.getElementById('soup').value},timeBudgetMinutes:+document.getElementById('timeBudget').value||undefined,todayFlavors:{self:sf,partner:pf},coupleProfileId:profileId})});
     const gj=await gr.json();if(!gj.success)throw new Error(gj.error||'生成失败');
     currentPlans=gj.data.plans;
-    document.getElementById('step1Result').innerHTML=currentPlans.length?'<div style="color:#4CAF50">✅ 生成了 '+currentPlans.length+' 套方案</div>':'<div class="error">没有匹配的方案</div>';
+    document.getElementById('step1Result').innerHTML=currentPlans.length?'<div style="color:#4CAF50">生成了 '+currentPlans.length+' 套方案</div>':'<div class="error">没有匹配的方案</div>';
     if(currentPlans.length){renderPlans();setStep(2);}
   }catch(e){document.getElementById('step1Result').innerHTML='<div class="error">'+e.message+'</div>';}
-  finally{btn.disabled=false;btn.textContent='🍳 生成整餐方案';}
+  finally{btn.disabled=false;btn.textContent='生成整餐方案';}
 }
 
 function renderPlans(){
-  document.getElementById('plansContainer').innerHTML=currentPlans.map((p,i)=>`<div class="plan-card" id="plan-${i}"><h3>方案 ${'ABC'[i]}</h3>${p.dishes.map((d,j)=>`<div class="dish-row"><span class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></span><button class="btn-sm" onclick="startSwap(${i},${j})">换一道</button></div>`).join('')}<div class="alt-list" id="alts-${i}" style="display:none"></div><div class="meta">⏱ 约${p.totalTimeMinutes}分钟 · 难度${'⭐'.repeat(p.difficulty)}</div><div class="rationale">${p.rationale}</div><button class="btn btn-primary" style="background:#4CAF50;margin-top:8px" onclick="confirmPlan(${i})">OK！就吃这个！</button></div>`).join('');
+  document.getElementById('plansContainer').innerHTML=currentPlans.map((p,i)=>`<div class="plan-card" id="plan-${i}"><h3>方案 ${'ABC'[i]}</h3>${p.dishes.map((d,j)=>`<div class="dish-row"><span class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></span><button class="btn-sm" onclick="startSwap(${i},${j})">换一道</button></div>`).join('')}<div class="alt-list" id="alts-${i}" style="display:none"></div><div class="meta">约${p.totalTimeMinutes}分钟 · 难度Lv${p.difficulty}</div><div class="rationale">${p.rationale}</div><button class="btn btn-primary" style="background:#4CAF50;margin-top:8px" onclick="confirmPlan(${i})">OK！就吃这个！</button></div>`).join('');
 }
 
-async function startSwap(pi,di){const plan=currentPlans[pi],dish=plan.dishes[di],c=document.getElementById('alts-'+pi);c.style.display='block';c.innerHTML='<div class="loading">查找替代菜...</div>';try{const r=await fetch(API+'/recipes?type='+encodeURIComponent(dish.role)+'&limit=30');const j=await r.json();const alts=(j.data||[]).filter(rec=>rec.id!==dish.recipeId);c.innerHTML=alts.length?alts.map(a=>`<div class="alt-item" onclick="doSwap(${pi},${di},'${a.id}')"><span><strong>${a.name}</strong><br><span class="time">${a.total_time_minutes||'?'}分钟 · 难度${'⭐'.repeat(a.difficulty||1)}</span></span><span style="color:#FF6B6B;font-size:14px">👉 换这个</span></div>`).join(''):'<div style="color:#999;padding:12px">没有同类型替代菜可选</div>';}catch(e){c.innerHTML='<div class="error">'+e.message+'</div>';}}
-async function doSwap(pi,di,nid){const plan=currentPlans[pi],c=document.getElementById('alts-'+pi);c.innerHTML='<div class="loading">替换中...</div>';try{const r=await fetch(API+'/meal-plans/'+plan.id+'/replace-dish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dishIndex:di,newRecipeId:nid})});const j=await r.json();if(!j.success)throw new Error(j.error||'替换失败');currentPlans[pi]=j.data;renderPlans();c.style.display='none';document.getElementById('step2Result').innerHTML='<div style="color:#4CAF50;font-size:14px">✅ 替换成功！方案已更新</div>';}catch(e){c.innerHTML='<div class="error">'+e.message+'</div>';}}
+async function startSwap(pi,di){const plan=currentPlans,dish=plan.dishes,c=document.getElementById('alts-'+pi);c.style.display='block';c.innerHTML='<div class="loading">查找替代菜...</div>';try{const r=await fetch(API+'/recipes?type='+encodeURIComponent(dish.role)+'&limit=30');const j=await r.json();const alts=(j.data||[]).filter(rec=>rec.id!==dish.recipeId);c.innerHTML=alts.length?alts.map(a=>`<div class="alt-item" onclick="doSwap(${pi},${di},'${a.id}')"><span><strong>${a.name}</strong><br><span class="time">${a.total_time_minutes||'?'}分钟 · 难度Lv${a.difficulty||1}</span></span><span style="color:#FF6B6B;font-size:14px">换这个</span></div>`).join(''):'<div style="color:#999;padding:12px">没有同类型替代菜可选</div>';}catch(e){c.innerHTML='<div class="error">'+e.message+'</div>';}}
+async function doSwap(pi,di,nid){const plan=currentPlans,c=document.getElementById('alts-'+pi);c.innerHTML='<div class="loading">替换中...</div>';try{const r=await fetch(API+'/meal-plans/'+plan.id+'/replace-dish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dishIndex:di,newRecipeId:nid})});const j=await r.json();if(!j.success)throw new Error(j.error||'替换失败');currentPlans=j.data;renderPlans();c.style.display='none';document.getElementById('step2Result').innerHTML='<div style="color:#4CAF50;font-size:14px">替换成功！方案已更新</div>';}catch(e){c.innerHTML='<div class="error">'+e.message+'</div>';}}
 
 async function confirmPlan(pi){
-  selectedPlan=currentPlans[pi];const r=document.getElementById('step3Result');
-  document.getElementById('confirmInfo').innerHTML=`<div class="plan-card"><h3>确认方案 ${'ABC'[pi]}</h3>${selectedPlan.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}<div class="meta">⏱ 约${selectedPlan.totalTimeMinutes}分钟</div></div>`;
+  selectedPlan=currentPlans;const r=document.getElementById('step3Result');
+  document.getElementById('confirmInfo').innerHTML=`<div class="plan-card"><h3>确认方案 ${'ABC'[i]}</h3>${selectedPlan.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}<div class="meta">约${selectedPlan.totalTimeMinutes}分钟</div></div>`;
   setStep(3);r.innerHTML='<div class="loading">确认中...</div>';
   try{
     const cr=await fetch(API+'/meal-plans/'+selectedPlan.id+'/confirm',{method:'PATCH'});
     const cj=await cr.json();if(!cj.success)throw new Error(cj.error||'确认失败');
-    r.innerHTML='<div style="color:#4CAF50;font-size:16px;text-align:center;padding:10px">✅ 方案已确认！</div>';setTimeout(()=>{setStep(4);goShopping();},500);
+    r.innerHTML='<div style="color:#4CAF50;font-size:16px;text-align:center;padding:10px">方案已确认！</div>';setTimeout(()=>{setStep(4);goShopping();},500);
   }catch(e){r.innerHTML='<div class="error">'+e.message+'</div>';}
 }
 
@@ -183,17 +183,17 @@ async function goShopping(){
     const sl=selectedPlan.shoppingList||{alreadyHave:[],needToBuy:[],optional:[]};
     let html='';
     if(sl.needToBuy&&sl.needToBuy.length){
-      html+='<div class="shopping-section"><h3>🛒 需要购买</h3>';
+      html+='<div class="shopping-section"><h3>需要购买</h3>';
       sl.needToBuy.forEach((it,i)=>html+=`<div class="shopping-item"><input type="checkbox" id="buy-${i}" ${it.checked?'checked':''} onchange="checkItem('needToBuy',${i},this.checked)"><span>${it.name} — ${it.amount} <small style="color:#999">(${it.fromRecipe})</small></span></div>`);
       html+='</div>';
     }
     if(sl.alreadyHave&&sl.alreadyHave.length){
-      html+='<div class="shopping-section"><h3>✅ 家里已有</h3>';
+      html+='<div class="shopping-section"><h3>家里已有</h3>';
       sl.alreadyHave.forEach(it=>html+=`<div class="shopping-item done"><span>${it.name} — ${it.amount}</span></div>`);
       html+='</div>';
     }
     if(sl.optional&&sl.optional.length){
-      html+='<div class="shopping-section"><h3>✨ 可选</h3>';
+      html+='<div class="shopping-section"><h3>可选</h3>';
       sl.optional.forEach(it=>html+=`<div class="shopping-item"><span>${it.name} — ${it.amount}</span></div>`);
       html+='</div>';
     }
@@ -202,7 +202,7 @@ async function goShopping(){
   }catch(e){c.innerHTML='<div class="error">'+e.message+'</div>';}
 }
 async function checkItem(section,idx,checked){
-  const items=[{name:selectedPlan.shoppingList[section][idx].name,checked}];
+  const items=[{name:selectedPlan.shoppingList.name,checked}];
   await fetch(API+'/meal-plans/'+selectedPlan.id+'/shopping-list',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({items})});
 }
 
@@ -235,7 +235,7 @@ function renderCooking(){
     html+=`<div class="cooking-dish"><h3>${d.role}：${d.recipeSnapshot.name}</h3>`;
     d.recipeSnapshot.steps.forEach(s=>{
       const done=cookState.completed.includes(stepIdx);
-      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${(s.step_order||s.order||(idx+1))}. ${s.description}<div class="step-meta">${s.durationMinutes?'⏱'+s.durationMinutes+'分钟 ':''}${s.fireHint?'🔥'+s.fireHint+' ':''}${s.warning?'⚠️'+s.warning:''}</div></div></div>`;
+      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${(s.step_order||s.order||(idx+1))}. ${s.description}<div class="step-meta">${s.durationMinutes?'(time)'+s.durationMinutes+'分钟 ':''}${s.fireHint?'(fire)'+s.fireHint+' ':''}${s.warning?'(warn)'+s.warning:''}</div></div></div>`;
       stepIdx++;
     });
     html+='</div>';
@@ -255,7 +255,7 @@ async function toggleStep(idx){
 function goFeedback(){
   setStep(6);
   const tags=['下次还想吃','太辣','太淡','太油','太麻烦','适合工作日','适合周末','对方很喜欢'];
-  const ratings=[{k:'delicious',l:'😋 好吃'},{k:'okay',l:'😐 一般'},{k:'never_again',l:'🙅 不想再吃'}];
+  const ratings=[{k:'delicious',l:'好吃'},{k:'okay',l:'一般'},{k:'never_again',l:'不想再吃'}];
   const makePerson=(prefix,label)=>{
     let h=`<h3>${label}</h3><div class="rating-row">`;
     ratings.forEach(r=>h+=`<div class="rating-btn" id="${prefix}-rate-${r.k}" onclick="setRating('${prefix}','${r.k}')">${r.l}</div>`);
@@ -271,10 +271,10 @@ function goFeedback(){
 }
 function setRating(who,val){
   ['delicious','okay','never_again'].forEach(k=>document.getElementById(who+'-rate-'+k).className='rating-btn'+(k===val?' active':''));
-  window.feedbackState[who].overall=val;
+  window.feedbackState.overall=val;
 }
 function toggleTag(who,tag){
-  const el=document.getElementById(who+'-tag-'+tag);const tags=window.feedbackState[who].tags;
+  const el=document.getElementById(who+'-tag-'+tag);const tags=window.feedbackState.tags;
   if(tags.includes(tag)){tags.splice(tags.indexOf(tag),1);el.className='tag';}else{tags.push(tag);el.className='tag active';}
 }
 
@@ -289,9 +289,9 @@ async function submitFeedback(){
       note:document.getElementById('feedbackNote').value,photoUrl:undefined
     })});
     const j=await cr.json();if(!j.success)throw new Error(j.error||'提交失败');
-    r.innerHTML='<div style="color:#4CAF50;font-size:20px;text-align:center;padding:20px">🎉 全链路验收通过！<br><small>选场景→生成→确认→购物→做饭→反馈，全部跑通 ✅</small></div>';
+    r.innerHTML='<div style="color:#4CAF50;font-size:20px;text-align:center;padding:20px">全链路验收通过！<br><small>选场景→生成→确认→购物→做饭→反馈，全部跑通 </small></div>';
   }catch(e){r.innerHTML='<div class="error">'+e.message+'</div>';}
-  finally{btn.disabled=false;btn.textContent='💾 提交反馈';}
+  finally{btn.disabled=false;btn.textContent='提交反馈';}
 }
 </script>
 </body>
