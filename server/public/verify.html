@@ -163,8 +163,8 @@ async function startSwap(pi,di){const plan=currentPlans,dish=plan.dishes,c=docum
 async function doSwap(pi,di,nid){const plan=currentPlans,c=document.getElementById('alts-'+pi);c.innerHTML='<div class="loading">替换中...</div>';try{const r=await fetch(API+'/meal-plans/'+plan.id+'/replace-dish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dishIndex:di,newRecipeId:nid})});const j=await r.json();if(!j.success)throw new Error(j.error||'替换失败');currentPlans=j.data;renderPlans();c.style.display='none';document.getElementById('step2Result').innerHTML='<div style="color:#4CAF50;font-size:14px">替换成功！方案已更新</div>';}catch(e){c.innerHTML='<div class="error">'+e.message+'</div>';}}
 
 async function confirmPlan(pi){
-  selectedPlan=currentPlans;const r=document.getElementById('step3Result');
-  document.getElementById('confirmInfo').innerHTML=`<div class="plan-card"><h3>确认方案 ${'ABC'[i]}</h3>${selectedPlan.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}<div class="meta">约${selectedPlan.totalTimeMinutes}分钟</div></div>`;
+  selectedPlan=currentPlans[pi];const r=document.getElementById('step3Result');
+  document.getElementById('confirmInfo').innerHTML=`<div class="plan-card"><h3>确认方案 ${'ABC'[pi]}</h3>${selectedPlan.dishes.map(d=>`<div class="dish">${d.role}：<strong>${d.recipeSnapshot.name}</strong></div>`).join('')}<div class="meta">约${selectedPlan.totalTimeMinutes}分钟</div></div>`;
   setStep(3);r.innerHTML='<div class="loading">确认中...</div>';
   try{
     const cr=await fetch(API+'/meal-plans/'+selectedPlan.id+'/confirm',{method:'PATCH'});
@@ -233,9 +233,11 @@ function renderCooking(){
   let stepIdx=0;
   selectedPlan.dishes.forEach(d=>{
     html+=`<div class="cooking-dish"><h3>${d.role}：${d.recipeSnapshot.name}</h3>`;
+    let dishStepIdx=0;
     d.recipeSnapshot.steps.forEach(s=>{
       const done=cookState.completed.includes(stepIdx);
-      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${(s.step_order||s.order||(idx+1))}. ${s.description}<div class="step-meta">${s.durationMinutes?'(time)'+s.durationMinutes+'分钟 ':''}${s.fireHint?'(fire)'+s.fireHint+' ':''}${s.warning?'(warn)'+s.warning:''}</div></div></div>`;
+      dishStepIdx++;
+      html+=`<div class="step-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleStep(${stepIdx})"><div class="step-text">${(s.step_order||s.order||dishStepIdx)}. ${s.description}<div class="step-meta">${s.durationMinutes?'(time)'+s.durationMinutes+'分钟 ':''}${s.fireHint?'(fire)'+s.fireHint+' ':''}${s.warning?'(warn)'+s.warning:''}</div></div></div>`;
       stepIdx++;
     });
     html+='</div>';
